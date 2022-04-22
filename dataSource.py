@@ -6,6 +6,9 @@ logger = logging.getLogger()
 ADD_USER_STATEMENT = """UPDATE count
                                 SET users = users + 1 """
 
+INSERT_USERS_STATEMENT = """INSERT INTO count(users)
+                                    VALUES(0)"""
+
 
 class DataSource:
     def __init__(self, database_url):
@@ -35,6 +38,22 @@ class DataSource:
                 cur.execute(command)
             cur.close()
             conn.commit()   # Apply Edits
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            logger.error(error)
+            raise error
+
+        finally:
+            self.close_connection(conn)
+
+    def create_users_row(self):
+        conn = None
+        try:
+            conn = self.get_connection()
+            cur = conn.cursor()
+            cur.execute(INSERT_USERS_STATEMENT)
+            cur.close()
+            conn.commit()
 
         except (Exception, psycopg2.DatabaseError) as error:
             logger.error(error)
