@@ -80,7 +80,7 @@ class DataSource:
             raise error
 
         finally:
-            self.close_connection()
+            self.close_connection(conn)
             if nRows == 1:
                 return False
             return True
