@@ -7,6 +7,10 @@ import sys
 
 
 READER_DATA = {
+    "القارئ عمر الخليلي":
+        {
+            "من سورة المائدة": ["https://t.me/mstoda3/153", "https://t.me/mstoda3/154"]
+        },
     "القارئ أنس بادي":
         {
             "سورة الكهف كاملة": ["https://t.me/ahsan_alhadeeth/75", "https://t.me/ahsan_alhadeeth/76"],
