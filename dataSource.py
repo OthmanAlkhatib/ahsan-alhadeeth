@@ -9,6 +9,8 @@ ADD_USER_STATEMENT = """UPDATE count
 INSERT_USERS_STATEMENT = """INSERT INTO count(users)
                                     VALUES(0)"""
 
+GET_ROWS_STATEMENT = """SELECT * FROM count"""
+
 
 class DataSource:
     def __init__(self, database_url):
@@ -61,6 +63,27 @@ class DataSource:
 
         finally:
             self.close_connection(conn)
+
+    def users_row_not_inserted(self):
+        conn = None
+        nRows = 0
+        try:
+            conn  = self.get_connection()
+            cur = conn.cursor()
+            cur.execute(GET_ROWS_STATEMENT)
+            for row in cur.fetchall():
+                nRows += 1
+            cur.close()
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            logger.error(error)
+            raise error
+
+        finally:
+            self.close_connection()
+            if nRows == 1:
+                return False
+            return True
 
     def add_user(self):
         conn = None

@@ -166,5 +166,6 @@ if __name__ == "__main__":
     updater.dispatcher.add_handler(MessageHandler(Filters.text(BACK_BUTTON), goBack))
 
     data_source.create_tables()
-    data_source.create_users_row()
+    if data_source.users_row_not_inserted():
+        data_source.create_users_row()
     run()
