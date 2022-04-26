@@ -38,6 +38,7 @@ READER_DATA = {
         },
     "القارئ عدنان الجودي":
         {
+            "من سورة الروم": ["https://t.me/mstoda3/158", "https://t.me/mstoda3/159"],
             "من سورة البقرة": ["https://t.me/ahsan_alhadeeth/83", "https://t.me/ahsan_alhadeeth/84"],
             "من سورة آل عمران": ["https://t.me/ahsan_alhadeeth/42", "https://t.me/ahsan_alhadeeth/43"],
             "من سورة الإسراء": ["https://t.me/mstoda3/114", "https://t.me/mstoda3/115"],
