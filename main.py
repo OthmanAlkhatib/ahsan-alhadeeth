@@ -7,12 +7,21 @@ import sys
 
 
 READER_DATA = {
+    "الشيخ محمد مرعي الخطيب":
+        {
+            "من سورة غافر": ["https://t.me/mstoda3/163", "https://t.me/mstoda3/164"]
+        },
+    "الشيخ ياسر الحاج عمر":
+        {
+            "سورة الفرقان كاملة": ["https://t.me/mstoda3/161", "https://t.me/mstoda3/162"]
+        },
     "القارئ عمر الخليلي":
         {
             "من سورة المائدة": ["https://t.me/mstoda3/153", "https://t.me/mstoda3/154"]
         },
     "القارئ أنس بادي":
         {
+            "من سورة طه": ["https://t.me/mstoda3/166", "https://t.me/mstoda3/167"],
             "سورة الكهف كاملة": ["https://t.me/ahsan_alhadeeth/75", "https://t.me/ahsan_alhadeeth/76"],
             "سورة الملك كاملة": ["https://t.me/ahsan_alhadeeth/39", "https://t.me/ahsan_alhadeeth/40"],
             "سورة الإنسان كاملة": ["https://t.me/mstoda3/120", "https://t.me/mstoda3/121"],
@@ -81,8 +90,15 @@ READER_DATA = {
         }
 }
 
+NotPublished = {
+    "الشيخ نادر الدباغ | من سورة كذا": "https://t.me/ahsan_alhadeeth/100",
+    "الشيخ نادر الدباغ | من سورة كذا التانية": "https://t.me/mstoda3/152",
+    "القارئ نبراس العبد الله | من سورة كذا": "https://t.me/ahsan_alhadeeth/72",
+}
+
 Readers = list(READER_DATA.keys())
 BACK_BUTTON = "رجوع"
+OTHER_BUTTON = "تلاوات لم تُنشر"
 
 TOKEN = os.getenv("TOKEN")
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -125,9 +141,11 @@ def reader_info(reader):
     return list(READER_DATA[reader].keys())
 
 
+
 def reader_buttons():
     # Storing Buttons (Rows and Columns)
     keyboard = [[KeyboardButton(i)] for i in list(READER_DATA.keys())]
+    keyboard.append([KeyboardButton(OTHER_BUTTON)])
     return ReplyKeyboardMarkup(keyboard)
 
 def reader_video_buttons(update: Update, context: CallbackContext) :
@@ -140,6 +158,11 @@ def reader_video_buttons(update: Update, context: CallbackContext) :
     keyboard.append([KeyboardButton(BACK_BUTTON)])
     update.message.reply_text("اختر تلاوة", reply_markup=ReplyKeyboardMarkup(keyboard))
 
+def other_telawat_buttons(update: Update, context: CallbackContext):
+    keyboard = [[KeyboardButton(i)] for i in list(NotPublished.keys())]
+    keyboard.append([KeyboardButton(BACK_BUTTON)])
+    update.message.reply_text("اختر تلاوة", reply_markup=ReplyKeyboardMarkup(keyboard))
+
 
 
 def reader_video_button_handler(update: Update, context: CallbackContext) :
@@ -147,6 +170,9 @@ def reader_video_button_handler(update: Update, context: CallbackContext) :
     telawa = update.message.text
     update.message.bot.send_video(update.message.chat_id, READER_DATA[reader_name][telawa][0])
     update.message.bot.send_video(update.message.chat_id, READER_DATA[reader_name][telawa][1])
+
+def telawat_not_published(update: Update, context: CallbackContext):
+    update.message.bot.send_video(update.message.chat_id, NotPublished[update.message.text])
 
 
 if __name__ == "__main__":
@@ -163,6 +189,11 @@ if __name__ == "__main__":
         for telawa in reader_telawat:
             updater.dispatcher.add_handler(
                 MessageHandler(Filters.text(telawa), reader_video_button_handler))
+
+    for telawa in list(NotPublished.keys()):
+        updater.dispatcher.add_handler(MessageHandler(Filters.text(telawa), telawat_not_published))
+
+    updater.dispatcher.add_handler(MessageHandler(Filters.text(OTHER_BUTTON), other_telawat_buttons))
 
     updater.dispatcher.add_handler(MessageHandler(Filters.text(BACK_BUTTON), goBack))
 
