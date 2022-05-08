@@ -4,6 +4,7 @@ from dataSource import DataSource
 import os
 import logging
 import sys
+from telegram import InputMediaVideo
 
 
 READER_DATA = {
@@ -30,7 +31,7 @@ READER_DATA = {
         },
     "الشيخ محمد المصري":
        {
-            "من سورة الصافات": ["https://t.me/mstoda3/126", "https://t.me/mstoda3/124"],
+            "من سورة الصافات": ["https://t.me/mstoda3/126", "https://t.me/ahsan_alhadeeth/140"],
             "من سورة الأنعام 2": ["https://t.me/ahsan_alhadeeth/67", "https://t.me/ahsan_alhadeeth/68"],
             "من سورة ص" : ["https://t.me/ahsan_alhadeeth/33","https://t.me/ahsan_alhadeeth/34"],
             "من سورة الأحزاب" : ["https://t.me/mstoda3/117","https://t.me/mstoda3/118"],
@@ -90,14 +91,36 @@ READER_DATA = {
         }
 }
 
-NotPublished = {
-    "الشيخ نادر الدباغ | من سورة كذا": "https://t.me/ahsan_alhadeeth/100",
-    "الشيخ نادر الدباغ | من سورة كذا التانية": "https://t.me/mstoda3/152",
-    "القارئ نبراس العبد الله | من سورة كذا": "https://t.me/ahsan_alhadeeth/72",
+OTHERS_DATA = {
+    "الشيخ نادر الدباغ | من سورة القصص": "https://t.me/ahsan_alhadeeth/100",
+}
+
+STORIES_DATA = {
+    "(قال الله هذا يوم ينفع الصادقين صدقهم...) | القارئ عمر الخليلي": "https://t.me/mstoda3/194",
+    "(إن المتقين في جناتٍ ونعيم... ) | القارئ خالد الجيزاوي": "https://t.me/mstoda3/192",
+    "(وأُزلفت الجنة للمتقين غير بعيد...) | الشيخ نادر الدباغ": "https://t.me/mstoda3/191",
+    "(دعواهم فيها سبحانك اللهم...) | الشيخ صفوح الكيلاني": "https://t.me/mstoda3/190",
+    "(فمن تبعني فإنه مني...) | الشيخ محمود مطر": "https://t.me/mstoda3/188",
+    "(واذكر في الكتاب مريم...) | الشيخ أنس علوش": "https://t.me/mstoda3/189",
+    "(أذلك خيرٌ نزلاً أم شجرة الزقوم...) | الشيخ محمد المصري": "https://t.me/mstoda3/187",
+    "(وعباد الرحمن...) | الشيخ محمد المصري": "https://t.me/mstoda3/186",
+    "(إنا عرضنا الأمانة...) | الشيخ صفوح الكيلاني": "https://t.me/mstoda3/185",
+    "(لا يُكلف الله نفساً إلا وسعها...) | الشيخ أنس علوش": "https://t.me/mstoda3/184"
+}
+
+PRAYERS_DATA = {
+    "الشيخ محمد بسمار | دعاء الختم | رمضان 2022": ["https://t.me/mstoda3/180", "https://t.me/ahsan_alhadeeth/134"],
+    "القارئ أنس بادي | دعاء الوتر | رمضان 2021": ["https://t.me/mstoda3/168", "https://t.me/mstoda3/170"],
+    "الشيخ محمد أنس علوش | دعاء يوم عرفة": ["https://t.me/mstoda3/171", "https://t.me/mstoda3/172"]
 }
 
 Readers = list(READER_DATA.keys())
-BACK_BUTTON = "رجوع"
+TELAWAT_BUTTON = "تلاوات"
+STORIES_BUTTON = "حالات"
+PRAYERS_BUTTON = "أدعية"
+
+BACK_BUTTON_DEEP = "رجوع"
+BACK_BUTTON = "العودة"
 OTHER_BUTTON = "تلاوات لم تُنشر"
 
 TOKEN = os.getenv("TOKEN")
@@ -131,22 +154,28 @@ def start_handler(update, context):
     لتبقى على اطلاع بأحدث المنشورات والتلاوات العطرة في القناة
 
     """)
-    update.message.reply_text("الرجاء اختيار قارئ", reply_markup=reader_buttons())
+    update.message.reply_text("اختر القسم", reply_markup=main_buttons())
     data_source.add_user()
 
 def goBack(update: Update, context: CallbackContext):
-    update.message.reply_text("الرجاء اختيار قارئ", reply_markup=reader_buttons())
+    update.message.reply_text("اختر القسم", reply_markup=main_buttons())
+
+# def goBackDeep(update: Update, context: CallbackContext):
+#     update.message.reply_text("اختر قارئ", reply_markup=reader_buttons())
 
 def reader_info(reader):
     return list(READER_DATA[reader].keys())
 
 
 
-def reader_buttons():
-    # Storing Buttons (Rows and Columns)
-    keyboard = [[KeyboardButton(i)] for i in list(READER_DATA.keys())]
-    keyboard.append([KeyboardButton(OTHER_BUTTON)])
+def main_buttons():
+    keyboard = [[KeyboardButton(TELAWAT_BUTTON)], [KeyboardButton(STORIES_BUTTON)], [KeyboardButton(PRAYERS_BUTTON)], [KeyboardButton(OTHER_BUTTON)]]
     return ReplyKeyboardMarkup(keyboard)
+
+def reader_buttons(update: Update, context: CallbackContext):
+    keyboard = [[KeyboardButton(i)] for i in list(READER_DATA.keys())]
+    keyboard.append([KeyboardButton(BACK_BUTTON)])
+    update.message.reply_text("اختر قارئ", reply_markup=ReplyKeyboardMarkup(keyboard))
 
 def reader_video_buttons(update: Update, context: CallbackContext) :
     # Storing Buttons (Rows and Columns)
@@ -155,13 +184,23 @@ def reader_video_buttons(update: Update, context: CallbackContext) :
     context.user_data["reader_name"] = message
 
     keyboard = [[KeyboardButton(reader[i])] for i in range(len(reader))]
-    keyboard.append([KeyboardButton(BACK_BUTTON)])
+    keyboard.append([KeyboardButton(BACK_BUTTON_DEEP)])
     update.message.reply_text("اختر تلاوة", reply_markup=ReplyKeyboardMarkup(keyboard))
 
 def other_telawat_buttons(update: Update, context: CallbackContext):
-    keyboard = [[KeyboardButton(i)] for i in list(NotPublished.keys())]
+    keyboard = [[KeyboardButton(i)] for i in list(OTHERS_DATA.keys())]
     keyboard.append([KeyboardButton(BACK_BUTTON)])
     update.message.reply_text("اختر تلاوة", reply_markup=ReplyKeyboardMarkup(keyboard))
+
+def stories_buttons(update: Update, context: CallbackContext):
+    keyboard = [[KeyboardButton(i)] for i in list(STORIES_DATA.keys())]
+    keyboard.append([KeyboardButton(BACK_BUTTON)])
+    update.message.reply_text("اختر حالة", reply_markup=ReplyKeyboardMarkup(keyboard))
+
+def prayers_buttons(update: Update, context: CallbackContext):
+    keyboard = [[KeyboardButton(i)] for i in list(PRAYERS_DATA.keys())]
+    keyboard.append([KeyboardButton(BACK_BUTTON)])
+    update.message.reply_text("اختر دعاء", reply_markup=ReplyKeyboardMarkup(keyboard))
 
 
 
@@ -172,7 +211,14 @@ def reader_video_button_handler(update: Update, context: CallbackContext) :
     update.message.bot.send_video(update.message.chat_id, READER_DATA[reader_name][telawa][1])
 
 def telawat_not_published(update: Update, context: CallbackContext):
-    update.message.bot.send_video(update.message.chat_id, NotPublished[update.message.text])
+    update.message.bot.send_video(update.message.chat_id, OTHERS_DATA[update.message.text])
+
+def stories(update: Update, context: CallbackContext):
+    update.message.bot.send_video(update.message.chat_id, STORIES_DATA[update.message.text])
+
+def prayers(update: Update, context: CallbackContext):
+    update.message.bot.send_video(update.message.chat_id, PRAYERS_DATA[update.message.text][0])
+    update.message.bot.send_video(update.message.chat_id, PRAYERS_DATA[update.message.text][1])
 
 
 if __name__ == "__main__":
@@ -180,6 +226,8 @@ if __name__ == "__main__":
     updater = Updater(TOKEN, use_context=True)
     # Add Command Handler (Which Function Will Be Called When Using Exact Command)
     updater.dispatcher.add_handler(CommandHandler("start", start_handler))
+
+    updater.dispatcher.add_handler(MessageHandler(Filters.text(TELAWAT_BUTTON), reader_buttons))
 
     for reader in Readers:
         updater.dispatcher.add_handler(MessageHandler(Filters.text(reader), reader_video_buttons))
@@ -190,12 +238,27 @@ if __name__ == "__main__":
             updater.dispatcher.add_handler(
                 MessageHandler(Filters.text(telawa), reader_video_button_handler))
 
-    for telawa in list(NotPublished.keys()):
+
+    for telawa in list(OTHERS_DATA.keys()):
         updater.dispatcher.add_handler(MessageHandler(Filters.text(telawa), telawat_not_published))
 
     updater.dispatcher.add_handler(MessageHandler(Filters.text(OTHER_BUTTON), other_telawat_buttons))
 
+
+    for story in list(STORIES_DATA.keys()):
+        updater.dispatcher.add_handler(MessageHandler(Filters.text(story), stories))
+
+    updater.dispatcher.add_handler(MessageHandler(Filters.text(STORIES_BUTTON), stories_buttons))
+
+
+    for prayer in list(PRAYERS_DATA.keys()):
+        updater.dispatcher.add_handler(MessageHandler(Filters.text(prayer), prayers))
+
+    updater.dispatcher.add_handler(MessageHandler(Filters.text(PRAYERS_BUTTON), prayers_buttons))
+
+
     updater.dispatcher.add_handler(MessageHandler(Filters.text(BACK_BUTTON), goBack))
+    updater.dispatcher.add_handler(MessageHandler(Filters.text(BACK_BUTTON_DEEP), reader_buttons))
 
     data_source.create_tables()
     if data_source.users_row_not_inserted():
