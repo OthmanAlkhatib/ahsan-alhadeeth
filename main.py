@@ -4,7 +4,6 @@ from dataSource import DataSource
 import os
 import logging
 import sys
-from telegram import InputMediaVideo
 
 
 READER_DATA = {
@@ -118,10 +117,10 @@ Readers = list(READER_DATA.keys())
 TELAWAT_BUTTON = "تلاوات"
 STORIES_BUTTON = "حالات"
 PRAYERS_BUTTON = "أدعية"
+OTHER_BUTTON = "تلاوات لم تُنشر"
 
 BACK_BUTTON_DEEP = "رجوع"
-BACK_BUTTON = "العودة"
-OTHER_BUTTON = "تلاوات لم تُنشر"
+BACK_BUTTON = "عودة"
 
 TOKEN = os.getenv("TOKEN")
 DATABASE_URL = os.environ.get("DATABASE_URL")
